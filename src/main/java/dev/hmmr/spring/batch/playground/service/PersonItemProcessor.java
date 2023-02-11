@@ -3,8 +3,10 @@ package dev.hmmr.spring.batch.playground.service;
 import dev.hmmr.spring.batch.playground.model.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class PersonItemProcessor implements ItemProcessor<Person, Person> {
 
   @Override

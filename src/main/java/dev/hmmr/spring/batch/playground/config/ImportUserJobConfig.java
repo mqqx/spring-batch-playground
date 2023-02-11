@@ -22,7 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
-public class BatchConfig {
+public class ImportUserJobConfig {
   @Bean
   public FlatFileItemReader<Person> reader() {
     final BeanWrapperFieldSetMapper<Person> mapper = new BeanWrapperFieldSetMapper<>();
@@ -35,11 +35,6 @@ public class BatchConfig {
         .names("firstName", "lastName")
         .fieldSetMapper(mapper)
         .build();
-  }
-
-  @Bean
-  public PersonItemProcessor processor() {
-    return new PersonItemProcessor();
   }
 
   @Bean
@@ -66,11 +61,12 @@ public class BatchConfig {
   public Step step1(
       JobRepository jobRepository,
       PlatformTransactionManager transactionManager,
-      JdbcBatchItemWriter<Person> writer) {
+      JdbcBatchItemWriter<Person> writer,
+      PersonItemProcessor processor) {
     return new StepBuilder("step1", jobRepository)
         .<Person, Person>chunk(10, transactionManager)
         .reader(reader())
-        .processor(processor())
+        .processor(processor)
         .writer(writer)
         .build();
   }

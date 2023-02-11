@@ -25,17 +25,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class BatchConfig {
   @Bean
   public FlatFileItemReader<Person> reader() {
+    final BeanWrapperFieldSetMapper<Person> mapper = new BeanWrapperFieldSetMapper<>();
+    mapper.setTargetType(Person.class);
+
     return new FlatFileItemReaderBuilder<Person>()
         .name("personItemReader")
         .resource(new ClassPathResource("sample.csv"))
         .delimited()
         .names("firstName", "lastName")
-        .fieldSetMapper(
-            new BeanWrapperFieldSetMapper<>() {
-              {
-                setTargetType(Person.class);
-              }
-            })
+        .fieldSetMapper(mapper)
         .build();
   }
 

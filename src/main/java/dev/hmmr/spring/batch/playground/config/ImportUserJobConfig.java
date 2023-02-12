@@ -1,18 +1,17 @@
 package dev.hmmr.spring.batch.playground.config;
 
 import dev.hmmr.spring.batch.playground.model.Person;
+import dev.hmmr.spring.batch.playground.repository.PersonRepository;
 import dev.hmmr.spring.batch.playground.service.JobCompletionNotificationListener;
 import dev.hmmr.spring.batch.playground.service.PersonItemProcessor;
-import javax.sql.DataSource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -38,12 +37,8 @@ public class ImportUserJobConfig {
   }
 
   @Bean
-  public JdbcBatchItemWriter<Person> writer(DataSource dataSource) {
-    return new JdbcBatchItemWriterBuilder<Person>()
-        .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-        .sql("INSERT INTO people (first_name, last_name) VALUES (:firstName, :lastName)")
-        .dataSource(dataSource)
-        .build();
+  public RepositoryItemWriter<Person> writer(PersonRepository personRepository) {
+    return new RepositoryItemWriterBuilder<Person>().repository(personRepository).build();
   }
 
   @Bean
@@ -61,7 +56,7 @@ public class ImportUserJobConfig {
   public Step step1(
       JobRepository jobRepository,
       PlatformTransactionManager transactionManager,
-      JdbcBatchItemWriter<Person> writer,
+      RepositoryItemWriter<Person> writer,
       PersonItemProcessor processor) {
     return new StepBuilder("step1", jobRepository)
         .<Person, Person>chunk(10, transactionManager)
